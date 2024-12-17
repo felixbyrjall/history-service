@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -44,11 +45,15 @@ public class SecurityConfig {
 				.sessionManagement(session ->
 						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> {
+					auth.requestMatchers("/h2-console-history/**").permitAll();
 					auth.requestMatchers("/api/csrf").permitAll();
 					auth.requestMatchers("/api/history/all").hasAuthority("ADMIN");
-					auth.requestMatchers("/actuator/health").permitAll();  // Allow access to health endpoint
+					auth.requestMatchers("/actuator/health").permitAll();
 					auth.anyRequest().hasAuthority("USER");
 				})
+				.headers(headers -> headers
+						.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
+				)
 				.addFilterBefore(new JwtAuthenticationFilter(secretKey()),
 						UsernamePasswordAuthenticationFilter.class);
 

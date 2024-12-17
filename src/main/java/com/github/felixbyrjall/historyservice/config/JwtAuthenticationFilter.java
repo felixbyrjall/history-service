@@ -28,6 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+
+		String requestURI = request.getRequestURI();
+		if (requestURI.contains("/h2-console-history/**") || requestURI.contains("/actuator/health")) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
 		String authHeader = request.getHeader("Authorization");
 
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
